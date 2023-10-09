@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.capstone.hackathon.entities.Role;
 import com.capstone.hackathon.entities.User;
 import com.capstone.hackathon.errorHandling.EmailExistsException;
 import com.capstone.hackathon.errorHandling.ResourceNotFoundException;
@@ -39,7 +41,9 @@ public class UserService {
 			throw new EmailExistsException("There is an account with that email adress: " + registrationRequest.getEmail());
 		}
 		// role confirmation from admin
-		if(registrationRequest.getRole().getRoleId()==4||registrationRequest.getRole().getRoleId()==3){
+		Role role=registrationRequest.getRole();
+		
+		if(role!=null&&(registrationRequest.getRole().getRoleId()==4||registrationRequest.getRole().getRoleId()==3)){
 			 if(AdminPermission(registrationRequest.getEmail())){
 				String newPw= hashPassword(registrationRequest.getPassword());
 				registrationRequest.setPassword(newPw);
