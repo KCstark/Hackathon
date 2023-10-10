@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.capstone.hackathon.entities.Role;
 import com.capstone.hackathon.entities.User;
 import com.capstone.hackathon.errorHandling.EmailExistsException;
 import com.capstone.hackathon.errorHandling.ResourceNotFoundException;
@@ -15,16 +14,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
-@Service
+@Service 
 public class UserService {
 
     private final UserRepo ur;
+
+	// @Autowired
+	// private BCryptPasswordEncoder bc;
 
     @Autowired
     public UserService(UserRepo ur) {
         this.ur = ur;
     }
-	// 1.participant(leader),2.teamMem,3.panelist,4.judge
+	// 1.Participant,2.TeamMember,3.Panelist,4.Judge
 
 	//register user -done
 	//login user
@@ -33,6 +35,7 @@ public class UserService {
 	//updateuser(id/email)
 	//delete(id/email)- 
 	//getAllUser -done
+	//
 
     //(LINK)Register
     public ResponseEntity<String> registerUser(User registrationRequest) throws EmailExistsException {
@@ -41,9 +44,9 @@ public class UserService {
 			throw new EmailExistsException("There is an account with that email adress: " + registrationRequest.getEmail());
 		}
 		// role confirmation from admin
-		Role role=registrationRequest.getRole();
+		String role=registrationRequest.getRole();
 		
-		if(role!=null&&(registrationRequest.getRole().getRoleId()==4||registrationRequest.getRole().getRoleId()==3)){
+		if(role!=null&&(registrationRequest.getRole().equals("Judge")||registrationRequest.getRole().equals("Panelist"))){
 			 if(AdminPermission(registrationRequest.getEmail())){
 				String newPw= hashPassword(registrationRequest.getPassword());
 				registrationRequest.setPassword(newPw);
@@ -51,6 +54,8 @@ public class UserService {
 				return ResponseEntity.ok("User registered successfully.");
 			 }
 		}
+		String newPw= hashPassword(registrationRequest.getPassword());
+		registrationRequest.setPassword(newPw);
 		ur.save(registrationRequest);
 		return ResponseEntity.ok("User registered successfully.");
 	}

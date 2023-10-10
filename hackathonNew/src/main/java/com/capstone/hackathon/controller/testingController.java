@@ -16,6 +16,7 @@ import com.capstone.hackathon.repo.UserRepo;
 public class testingController {
     @Autowired
     UserRepo ur;
+
     @PostMapping("/process")
     public String processFormData(@RequestBody User formData) {
         // Process the data or perform any backend tasks
@@ -36,4 +37,7 @@ public class testingController {
         // return "NICE :)";
 
     }
+
+    
+
 }

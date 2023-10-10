@@ -12,8 +12,14 @@
         <input type="email" id="email" required><br><br>
         <label for="password">Password:</label>
         <input type="text" id="password" required><br><br>
-        <!-- <label for="role">Role:</label>
-        <input type="Role" id="role" required><br><br> -->
+        <label for="role">Role:</label>
+        <select id="role"  required>
+            <option value="" disabled selected>Select Role</option>
+            <option value="Participant">Participant</option>
+            <option value="TeamMember">Team Member</option>
+            <option value="Panelist">Panelist</option>
+            <option value="Judge">Judge</option>
+        </select><br><br>
 
         <button onclick="submitForm()">Submit</button>
     </form>

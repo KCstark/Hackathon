@@ -24,9 +24,11 @@ public class User {
 	private String email;
 	@Column(name = "Password")
 	private String password;
+	@Column(name = "Role")
+	private String role;// 1.Participant, 2.TeamMember, 3.Panelist, 4.Judge
 	// @Column(name = "PhoneNo", unique = true)
 	// private int phone;
-
+	
 	@OneToOne(mappedBy="user", cascade=CascadeType.ALL)
 	private Panelist panelist;
 
@@ -36,10 +38,6 @@ public class User {
 	@OneToOne(mappedBy="user", cascade=CascadeType.ALL)
 	private RegUsers regUsers;
 	
-	@ManyToOne
-	@JoinColumn(name = "RoleID")
-	private Role role;// 1.participant(leader),2.teamMem,3.panelist,4.judge
-
 	@Override
 	public String toString() {
 		return "User [uId=" + uId + ", name=" + name + ", email=" + email + ", password=" + password + ", panelist="
@@ -74,7 +72,7 @@ public class User {
 		this.regUsers = regUsers;
 	}
 
-	public void setRole(Role role) {
+	public void setRole(String role) {
 		this.role = role;
 	}
 
@@ -106,7 +104,7 @@ public class User {
 		return regUsers;
 	}
 
-	public Role getRole() {
+	public String getRole() {
 		return role;
 	}
 
