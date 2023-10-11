@@ -1,124 +1,181 @@
 package com.capstone.hackathon.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.capstone.hackathon.entities.RegistrationRequest;
 import com.capstone.hackathon.entities.User;
 import com.capstone.hackathon.errorHandling.EmailExistsException;
 import com.capstone.hackathon.errorHandling.ResourceNotFoundException;
+import com.capstone.hackathon.repo.RegistrationRequestRepository;
 import com.capstone.hackathon.repo.UserRepo;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
-@Service 
+@Service
 public class UserService {
 
-    private final UserRepo ur;
+	private final UserRepo ur;
 
 	// @Autowired
 	// private BCryptPasswordEncoder bc;
 
-    @Autowired
-    public UserService(UserRepo ur) {
-        this.ur = ur;
-    }
-	// 1.Participant,2.TeamMember,3.Panelist,4.Judge
-
-	//register user -done
-	//login user
-	//update pw
-	//get user(id/email)- 
-	//updateuser(id/email)
-	//delete(id/email)- 
-	//getAllUser -done
-	//
-
-    //(LINK)Register
-    public ResponseEntity<String> registerUser(User registrationRequest) throws EmailExistsException {
-		//check if the email aredy exists
-		if (emailExist(registrationRequest.getEmail())) {
-			throw new EmailExistsException("There is an account with that email adress: " + registrationRequest.getEmail());
-		}
-		// role confirmation from admin
-		String role=registrationRequest.getRole();
-		
-		if(role!=null&&(registrationRequest.getRole().equals("Judge")||registrationRequest.getRole().equals("Panelist"))){
-			 if(AdminPermission(registrationRequest.getEmail())){
-				String newPw= hashPassword(registrationRequest.getPassword());
-				registrationRequest.setPassword(newPw);
-				ur.save(registrationRequest);
-				return ResponseEntity.ok("User registered successfully.");
-			 }
-		}
-		String newPw= hashPassword(registrationRequest.getPassword());
-		registrationRequest.setPassword(newPw);
-		ur.save(registrationRequest);
-		return ResponseEntity.ok("User registered successfully.");
+	@Autowired
+	public UserService(UserRepo ur) {
+		this.ur = ur;
 	}
 
-	//if email already in DB or not
+	@Autowired
+	private RegistrationRequestRepository rr;
+
+	@Autowired
+	private EmailService emailService;
+	// 1.Participant,2.TeamMember,3.Panelist,4.Judge
+
+	// register user -done
+	// login user- done
+	// forget pw()- done
+	// update pw()- done
+	// get user(id/email)- done
+	// updateuser(id/email)- done
+	// delete(id/email)- done
+	// getAllUser -done
+
+	// (LINK)Register
+	public String registerUser(User registrationRequest) throws EmailExistsException {
+		// check if the email aredy exists
+		if (emailExist(registrationRequest.getEmail())) {
+			throw new EmailExistsException(
+					"There is an account with that email adress: " + registrationRequest.getEmail());
+		}
+		// role confirmation from admin
+		String role = registrationRequest.getRole();
+		if (role != null && (registrationRequest.getRole().equals("Judge")
+				|| registrationRequest.getRole().equals("Panelist"))) {
+
+			RegistrationRequest newRequest = new RegistrationRequest();
+			newRequest.setPassword(hashPassword(registrationRequest.getPassword()));
+			newRequest.setEmail(registrationRequest.getEmail());
+			newRequest.setName(registrationRequest.getName());
+			newRequest.setRole(role);
+			rr.save(newRequest);
+			return "Registration request submitted. Waiting for admin approval. You will recieve an email confirmation.";
+		}
+		String newPw = hashPassword(registrationRequest.getPassword());
+		registrationRequest.setPassword(newPw);
+		ur.save(registrationRequest);
+		return "User registered successfully.";
+	}
+
+	// if email already in DB or not
 	private boolean emailExist(String email) {
-		User u= ur.findByEmail(email);
-		if(u!=null){
+		User u = ur.findByEmail(email);
+		if (u != null) {
 			return true;
 		}
 		return false;
 	}
 
-	//Encrypting pw
-	private String hashPassword(String password){
+	// Encrypting pw
+	private String hashPassword(String password) {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		String hashedPassword = passwordEncoder.encode(password);
 		return hashedPassword;
 	}
 
-	//(LINK)admin permission for judge & panelist reg req 
-	private boolean AdminPermission(String email) {
-		System.out.println("Email requesting to be Judge/Panelist: "+email);
-		boolean ans=false;
-		System.out.println("Allow? true or false");
-		try (Scanner sc = new Scanner(System.in)) {
-			ans=sc.nextBoolean();
-		}
-		System.out.println("Working, check status");
-		return ans;
-	}
 
-	//(LINK)login
-	public ResponseEntity<String> loginUser(User loginRequest) {
+	// (LINK)login
+	public String loginUser(User loginRequest) {
 		User curr_user = ur.findByEmail(loginRequest.getEmail());
-		if(curr_user==null){
-			throw new ResourceNotFoundException(loginRequest.getEmail()+" doesn't exist, please register!");
+		if (curr_user == null) {
+			throw new ResourceNotFoundException(loginRequest.getEmail() + " doesn't exist, please register!");
 		}
 		if (curr_user.getPassword().equals(hashPassword(loginRequest.getPassword()))) {
 			System.out.println("Welcome!");
-			return ResponseEntity.ok(loginRequest.toString());
+			return "Welcome " + loginRequest.getName() + ", how are you today? :)";
 		} else {
-			return ResponseEntity.badRequest().body("Invalid credentials (PW)");
+			return "Invalid credentials (Password wrong!)";
 		}
 	}
 
 	// Get a user by ID
-    public Optional<User> getUserById(int userId){
-		return ur.findById(userId);
-    }
+	public User getUserById(int userId) {
+		Optional<User> u = ur.findById(userId);
+		if (u.isPresent()) {
+			return u.get();
+		}
+		throw new ResourceNotFoundException("This userId dont exits!");
+	}
 
-    // Get all users
-    public List<User> getAllUsers() {
-        return ur.findAll();
-    }
+	// Get a user by email
+	public User getUserByEmail(String email) {
+		if (!emailExist(email))
+			throw new ResourceNotFoundException("No such email exist!");
+		return ur.findByEmail(email);
+	}
 
-    // Update a user
-    public User updateUser(User updatedUser) {
-        return ur.save(updatedUser);
-    }
+	// Get all users
+	public List<User> getAllUsers() {
+		return ur.findAll();
+	}
 
-    // Delete a user by ID
-    public void deleteUser(int userId) {
-        ur.deleteById(userId);
-    }
+	// Update a user
+	public User updateUser(User updatedUser) {
+		if (updatedUser != null) {
+			return ur.save(updatedUser);
+		} else {
+			throw new ResourceNotFoundException("No such user!");
+		}
+
+	}
+
+	// Delete a user by ID
+	public String deleteUser(int userId) {
+		Optional<User> u = ur.findById(userId);
+		if (u.isPresent()) {
+			ur.deleteById(userId);
+			return "Succefully deleted!";
+		}
+		throw new ResourceNotFoundException("No user for this userId!");
+	}
+
+	// ***************************************************************************************
+	// */
+	// UpdatePw
+	public String updatePassword(String email, User request) {
+		User user = ur.findByEmail(email);
+		if (user == null) {
+			// User with the provided email doesn't exist
+			throw new ResourceNotFoundException("User not found!!");
+		}
+		String hashedPassword = hashPassword(request.getPassword());
+		user.setPassword(hashedPassword);
+		ur.save(user);
+
+		return "Password updated successfully";
+	}
+
+	// forgetPw
+	public ResponseEntity<String> forgotPassword(String email) {
+		if (!emailExist(email)) {
+			throw new ResourceNotFoundException("Your email is not in our database please register first!");
+		}
+
+		String resetLink = "http://localhost:8081/hackathon/users/update-password**(form page)**";
+
+		try {
+			// Send the password reset email
+			emailService.sendPasswordResetEmail(email, resetLink);
+			return ResponseEntity.ok("Password reset email sent successfully");
+		} catch (MailException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Failed to send password reset email");
+		}
+	}
 }

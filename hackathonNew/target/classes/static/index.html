@@ -1,28 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Frontend to Backend </title>
+    <title>Admin Console</title>
 </head>
 <body>
-    <h1>Frontend to Backend Test</h1>
-    <form>
-        <label for="name">Name:</label>
-        <input type="text" id="name" required><br><br>
-        <label for="email">Email:</label>
-        <input type="email" id="email" required><br><br>
-        <label for="password">Password:</label>
-        <input type="text" id="password" required><br><br>
-        <label for="role">Role:</label>
-        <select id="role"  required>
-            <option value="" disabled selected>Select Role</option>
-            <option value="Participant">Participant</option>
-            <option value="TeamMember">Team Member</option>
-            <option value="Panelist">Panelist</option>
-            <option value="Judge">Judge</option>
-        </select><br><br>
+    <h1>Pending Registration Requests</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>User Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="requestsTable">
+        </tbody>
+    </table>
 
-        <button onclick="submitForm()">Submit</button>
-    </form>
-    <script src="script.js"></script>
+    <script>
+        fetch('/admin/requests')
+            .then(response => response.json())
+            .then(data => {
+                const table = document.getElementById('requestsTable');
+
+                data.forEach(request => {
+                    const row = table.insertRow();
+                    const userIdCell = row.insertCell(0);
+                    userIdCell.innerHTML = request.reqId;
+                    const userNameCell = row.insertCell(1);
+                    userNameCell.innerHTML = request.name;
+                    const emailCell = row.insertCell(2);
+                    emailCell.innerHTML = request.email;
+                    const roleCell = row.insertCell(3);
+                    roleCell.innerHTML = request.role;
+                    const actionCell = row.insertCell(4);
+                    actionCell.innerHTML = `<button onclick="approveRequest(${request.reqId})">Approve</button> <button onclick="rejectRequest(${request.reqId})">Reject</button>`;
+                });
+            });
+
+        function approveRequest(requestId) {
+            fetch(`/admin/approve/${requestId}`, { method: 'POST' })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                });
+        }
+
+        function rejectRequest(requestId) {
+            fetch(`/admin/reject/${requestId}`, { method: 'POST' })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                });
+        }
+    </script>
 </body>
 </html>

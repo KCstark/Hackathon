@@ -27,7 +27,7 @@ public class Idea {
     @Column(name = "Description")
     private String description;
     @Column(name = "Status")
-    private String status;
+    private String status="PENDING";
 
     @OneToMany(mappedBy = "idea", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<RegUsers> userIdeaMappings = new HashSet<>();

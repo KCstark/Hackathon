@@ -1,5 +1,6 @@
 package com.capstone.hackathon.controller;
 
+import com.capstone.hackathon.entities.Idea;
 import com.capstone.hackathon.entities.Panelist;
 import com.capstone.hackathon.service.PanelistService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,48 @@ public class PanelistController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+    // ************************************************************* */
+
+    // Show panelist ideas from idea table
+
+    @GetMapping("/{panelistId}/ideas")
+
+    public ResponseEntity<List<Idea>> getIdeasForPanelist(@PathVariable int panelistId) {
+        List<Idea> ideas = panelistService.getIdeasForPanelist(panelistId);
+        if (!ideas.isEmpty()) {
+            return new ResponseEntity<>(ideas, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/accept-idea/{panelistId}/{ideaId}")
+
+    public ResponseEntity<String> acceptIdea(@PathVariable int panelistId, @PathVariable int ideaId) {
+        boolean accepted = panelistService.acceptIdea(panelistId, ideaId);
+        if (accepted) {
+            return ResponseEntity.ok("Idea accepted successfully.");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/reject-idea/{panelistId}/{ideaId}")
+
+    public ResponseEntity<String> rejectIdea(@PathVariable int panelistId, @PathVariable int ideaId) {
+
+        boolean rejected = panelistService.rejectIdea(panelistId, ideaId);
+
+        if (rejected) {
+
+            return ResponseEntity.ok("Idea rejected successfully.");
+
+        } else {
+
+            return ResponseEntity.notFound().build();
+
         }
     }
 }
