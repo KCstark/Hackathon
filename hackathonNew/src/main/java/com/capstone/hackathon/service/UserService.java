@@ -99,7 +99,10 @@ public class UserService {
 		if (curr_user == null) {
 			throw new ResourceNotFoundException(loginRequest.getEmail() + " doesn't exist, please register!");
 		}
-		if (curr_user.getPassword().equals(hashPassword(loginRequest.getPassword()))) {
+		
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		
+		if (passwordEncoder.matches(loginRequest.getPassword(), curr_user.getPassword())) {
 			System.out.println("Welcome!");
 			return "Welcome " + loginRequest.getName() + ", how are you today? :)";
 		} else {
