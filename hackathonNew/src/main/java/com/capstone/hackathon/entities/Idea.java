@@ -23,9 +23,9 @@ public class Idea {
     @Column(name = "IdeaId")
     private int ideaId;
     @Column(name = "Title")
-    private String title;
+    private String title;//
     @Column(name = "Description")
-    private String description;
+    private String description;//word limit 300 
     @Column(name = "Status")
     private String status="PENDING";
 
@@ -92,6 +92,14 @@ public class Idea {
 
     public void setPanelist(Panelist panelist) {
         this.panelist = panelist;
+    }
+
+    public Set<RegUsers> getUserIdeaMappings() {
+        return userIdeaMappings;
+    }
+
+    public void setUserIdeaMappings(Set<RegUsers> userIdeaMappings) {
+        this.userIdeaMappings = userIdeaMappings;
     }
     
 }

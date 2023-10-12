@@ -9,14 +9,17 @@ import com.capstone.hackathon.entities.Idea;
 import com.capstone.hackathon.entities.Panelist;
 import com.capstone.hackathon.entities.User;
 import com.capstone.hackathon.errorHandling.ResourceNotFoundException;
+import com.capstone.hackathon.repo.PanelistRepo;
 import com.capstone.hackathon.repo.UserRepo;
 import com.capstone.hackathon.service.IdeaService;
 import com.capstone.hackathon.service.PanelistService;
+import com.capstone.hackathon.service.RegUserService;
 
 import jakarta.annotation.PostConstruct;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/hackathon/ideas")
@@ -27,8 +30,10 @@ public class IdeaController {
     private PanelistService ps;
     @Autowired
     private IdeaService ideaService;
+    @Autowired
+    private RegUserService rs;
 
-     List<Panelist> panel;
+    List<Panelist> panel;
     Panelist currP = null;
 
     @PostConstruct
@@ -46,14 +51,27 @@ public class IdeaController {
         }
         int size = panel.size();
         if (size <= 0) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ResourceNotFoundException("No panelist availale yet, cant save Idea, try again!");
         }
         // Save the idea to the repository
         currP = panel.remove(0);
         Idea createdIdea = ideaService.createIdea(idea);
-        createdIdea.setPanelist(currP);
+        createdIdea.setPanelist(currP);// saving panelist to idea
         panel.add(size - 1, currP);
+        Set<Idea> s = currP.getIdeas();
+        s.add(createdIdea);
+        currP.setIdeas(s);// saving idea to panelist
         return new ResponseEntity<>(createdIdea, HttpStatus.CREATED);
+    }
+
+    // Add Team Members
+    // Endpoint to add team members to an idea
+    @PostMapping("/{ideaId}/addTeamMembers")
+    public ResponseEntity<Idea> addTeamMembersToIdea(@PathVariable int ideaId,@RequestBody List<String> teamMemberEmails) {
+        // Call the service to add team members
+        rs.addTeamMembers(ideaId, teamMemberEmails);
+        // You might want to return a response, depending on your use case.
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     // View Idea
@@ -78,18 +96,12 @@ public class IdeaController {
         return new ResponseEntity<>(ideas, HttpStatus.OK);
     }
 
-    // Update an idea
-    @PutMapping("/{ideaId}")
-    public ResponseEntity<Idea> updateIdea(@PathVariable int ideaId, @RequestBody Idea updatedIdea) {
-        Optional<Idea> idea = ideaService.getIdeaById(ideaId);
-        if (idea.isPresent()) {
-            updatedIdea.setIdeaId(ideaId);
-            Idea updated = ideaService.updateIdea(updatedIdea);
-            return new ResponseEntity<>(updated, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
+      // Update an idea for a user by their ID
+      @PutMapping("/user/{userId}/update")
+      public ResponseEntity<Idea> updateIdeaForUser(@PathVariable int userId, @RequestBody Idea updatedIdea) {
+          Idea updated = ideaService.updateIdea(userId, updatedIdea);
+          return new ResponseEntity<>(updated, HttpStatus.OK);
+      }
 
     // Delete an idea by ID
     @DeleteMapping("/{ideaId}")

@@ -4,7 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.capstone.hackathon.entities.Idea;
+import com.capstone.hackathon.entities.RegUsers;
+import com.capstone.hackathon.entities.User;
+import com.capstone.hackathon.errorHandling.ResourceNotFoundException;
 import com.capstone.hackathon.repo.IdeaRepo;
+import com.capstone.hackathon.repo.UserRepo;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +22,9 @@ public class IdeaService {
     public IdeaService(IdeaRepo ideaRepository) {
         this.ideaRepository = ideaRepository;
     }
+
+    @Autowired
+    private UserRepo ur;
 
     // Create a new idea
     public Idea createIdea(Idea idea) {
@@ -34,9 +41,22 @@ public class IdeaService {
         return ideaRepository.findAll();
     }
 
-    // Update an idea
-    public Idea updateIdea(Idea updatedIdea) {
-        return ideaRepository.save(updatedIdea);
+    // Update an idea wrt user ID
+    public Idea updateIdea(int uId,Idea updatedIdea) {//title,descp
+        Optional<User> u=ur.findById(uId);
+        if(u.isPresent()){
+            RegUsers ru=u.get().getRegUsers();
+            if(ru==null){
+                throw new ResourceNotFoundException("User is registerd but has not submitted any Idea yet!");
+            }
+            Idea i=ru.getIdea();
+            i.setDescription(updatedIdea.getDescription());
+            i.setTitle(updatedIdea.getTitle());
+            updatedIdea.setIdeaId(i.getIdeaId());
+            return updatedIdea;
+        }else{
+            throw new ResourceNotFoundException("User not registred!!");
+        }
     }
 
     // Delete an idea by ID
