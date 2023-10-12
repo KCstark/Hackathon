@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.capstone.hackathon.entities.RegistrationRequest;
 import com.capstone.hackathon.entities.User;
 import com.capstone.hackathon.errorHandling.EmailExistsException;
+import com.capstone.hackathon.errorHandling.NotAllowedException;
 import com.capstone.hackathon.errorHandling.ResourceNotFoundException;
 import com.capstone.hackathon.repo.RegistrationRequestRepository;
 import com.capstone.hackathon.repo.UserRepo;
@@ -94,7 +95,7 @@ public class UserService {
 
 
 	// (LINK)login
-	public String loginUser(User loginRequest) {
+	public User loginUser(User loginRequest) {
 		User curr_user = ur.findByEmail(loginRequest.getEmail());
 		if (curr_user == null) {
 			throw new ResourceNotFoundException(loginRequest.getEmail() + " doesn't exist, please register!");
@@ -104,9 +105,14 @@ public class UserService {
 		
 		if (passwordEncoder.matches(loginRequest.getPassword(), curr_user.getPassword())) {
 			System.out.println("Welcome!");
-			return "Welcome " + loginRequest.getName() + ", how are you today? :)";
+			User n=new User();
+			n.setEmail(curr_user.getEmail());
+			n.setuId(curr_user.getuId());
+			n.setName(curr_user.getName());
+			n.setRole(curr_user.getRole());
+			return n;
 		} else {
-			return "Invalid credentials (Password wrong!)";
+			throw new NotAllowedException("Password Wrong!!");
 		}
 	}
 

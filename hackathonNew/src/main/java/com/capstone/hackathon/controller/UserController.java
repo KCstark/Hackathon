@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.capstone.hackathon.entities.User;
 import com.capstone.hackathon.errorHandling.EmailExistsException;
+import com.capstone.hackathon.errorHandling.NotAllowedException;
 import com.capstone.hackathon.errorHandling.ResourceNotFoundException;
 import com.capstone.hackathon.service.UserService;
 
@@ -40,16 +41,19 @@ public class UserController {
 
 	// secure it
 	@PostMapping("/login")
-	public ResponseEntity<String> loginUser(@RequestBody User loginRequest) {
-		try {
-			String message = us.loginUser(loginRequest);
-			return ResponseEntity.ok(message);
-		} catch (ResourceNotFoundException e) {
-			return ResponseEntity.badRequest().body(e.getMessage()); // User not found
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to log in");
-		}
-	}
+    public User loginUser(@RequestBody User loginRequest) {
+        try {
+            User loggedInUser = us.loginUser(loginRequest);
+            return loggedInUser;
+        } catch (ResourceNotFoundException e) {
+            throw e; // Rethrow ResourceNotFoundException to return a 404 status code
+        } catch (NotAllowedException e) {
+            throw e; // Rethrow NotAllowedException to return a 403 status code
+        } catch (Exception e) {
+            throw new RuntimeException("An unexpected error occurred: " + e.getMessage());
+        }
+    }
+
 
 	// *******************************************************************************
 	@PutMapping("/update-password")
