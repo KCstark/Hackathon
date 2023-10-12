@@ -17,10 +17,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.capstone.hackathon.repo.JudgesRepo;
+import com.capstone.hackathon.repo.PanelistRepo;
 import com.capstone.hackathon.repo.RegistrationRequestRepository;
 import com.capstone.hackathon.repo.UserRepo;
 import com.capstone.hackathon.service.EmailService;
 import com.capstone.hackathon.service.UserService;
+import com.capstone.hackathon.entities.Judges;
+import com.capstone.hackathon.entities.Panelist;
 import com.capstone.hackathon.entities.RegistrationRequest;
 import com.capstone.hackathon.entities.User;
 import com.capstone.hackathon.errorHandling.ResourceNotFoundException;
@@ -37,6 +41,10 @@ public class AdminController {
     EmailService es;
     @Autowired
     private UserService us;
+    @Autowired
+    private JudgesRepo jr;
+    @Autowired
+    private PanelistRepo pr;
 
     @GetMapping("/get")
 	public ResponseEntity<List<User>> getUserProfile() {
@@ -71,18 +79,31 @@ public class AdminController {
         user.setPassword(request.getPassword());
         user.setRole(request.getRole());
         ur.save(user);
-        registrationRequestRepository.save(request);
-        // registrationRequestRepository.deleteById(requestId);
+        if(request.getRole().equals("Judge")){
+            Judges j= new Judges();
+            j.setName(user.getName());
+            j.setUser(user);
+            jr.save(j);
+        }else{
+            Panelist p= new Panelist();
+            p.setUser(user);
+            pr.save(p);
+        }
+        // registrationRequestRepository.save(request);
+        registrationRequestRepository.deleteById(requestId);
+
+        return ResponseEntity.ok("Request Accepted successfully");
+
 
         // Notify the user that their request is approved
-        try {
-            // Send email
-            es.confirmationEmail(user.getEmail(), user.getRole(), "Approved");
-            return ResponseEntity.ok("Email sent successfully to: " + user.getEmail());
-        } catch (MailException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to send email");
-        }
+        // try {
+        //     // Send email
+        //     es.confirmationEmail(user.getEmail(), user.getRole(), "Approved");
+        //     return ResponseEntity.ok("Email sent successfully to: " + user.getEmail());
+        // } catch (MailException e) {
+        //     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        //             .body("Failed to send email");
+        // }
     }
 
     @PostMapping("/reject/{requestId}")
@@ -97,18 +118,31 @@ public class AdminController {
         request.setStatus("rejected");
         String mail = request.getEmail();
         String role = request.getRole();
-        registrationRequestRepository.save(request);
-        // registrationRequestRepository.deleteById(requestId);
+        // registrationRequestRepository.save(request);
+        registrationRequestRepository.deleteById(requestId);
+        return ResponseEntity.ok("Request rejected successfully");
 
         // Notify the user that their request is approved
-        try {
-            // Send email
-            es.confirmationEmail(mail, role, "rejected");
-            return ResponseEntity.ok("Email sent successfully to: " + mail);
-        } catch (MailException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to send email");
-        }
+        // try {
+        //     // Send email
+        //     es.confirmationEmail(mail, role, "rejected");
+        //     return ResponseEntity.ok("Email sent successfully to: " + mail);
+        // } catch (MailException e) {
+        //     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        //             .body("Failed to send email");
+        // }
+    }
+
+    @DeleteMapping("/")
+    public ResponseEntity<String> deleteAll(){
+        ur.deleteAll();
+        return ResponseEntity.ok("All users deleted succefully!");
+    }
+
+    @DeleteMapping("/allRequests")
+    public ResponseEntity<String> deleteAllReq(){
+        registrationRequestRepository.deleteAll();
+        return ResponseEntity.ok("All requests deleted succefully!");
     }
 
     // Delete a user by ID

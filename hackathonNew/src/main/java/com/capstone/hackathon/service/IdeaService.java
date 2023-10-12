@@ -43,4 +43,5 @@ public class IdeaService {
     public void deleteIdea(int ideaId) {
         ideaRepository.deleteById(ideaId);
     }
+
 }

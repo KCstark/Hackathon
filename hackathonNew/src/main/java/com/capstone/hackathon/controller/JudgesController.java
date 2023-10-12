@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.capstone.hackathon.entities.Judges;
+import com.capstone.hackathon.repo.JudgesRepo;
 import com.capstone.hackathon.service.JudgesService;
 
 import java.util.List;
@@ -21,6 +22,9 @@ public class JudgesController {
     public JudgesController(JudgesService judgesService) {
         this.judgesService = judgesService;
     }
+
+    @Autowired
+    private JudgesRepo jr;
 
     // Create a new judge
     @PostMapping
@@ -55,6 +59,13 @@ public class JudgesController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @DeleteMapping("/")
+    public ResponseEntity<String> deleteAllJudges() {
+        jr.deleteAll();
+        return ResponseEntity.ok("All Judges wont be deleted, because its dependent on User table :)");
+        
     }
 
     // Delete a judge by ID

@@ -2,6 +2,7 @@ package com.capstone.hackathon.controller;
 
 import com.capstone.hackathon.entities.Idea;
 import com.capstone.hackathon.entities.Panelist;
+import com.capstone.hackathon.repo.PanelistRepo;
 import com.capstone.hackathon.service.PanelistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,9 @@ public class PanelistController {
     public PanelistController(PanelistService panelistService) {
         this.panelistService = panelistService;
     }
+
+    @Autowired
+    private PanelistRepo pr;
 
     @GetMapping
     public ResponseEntity<List<Panelist>> getAllPanelists() {
@@ -49,6 +53,12 @@ public class PanelistController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @DeleteMapping("/")
+    public ResponseEntity<String> deleteAllPanelist() {
+        pr.deleteAll();
+        return ResponseEntity.ok("All panelists wont be deleted, because its dependent on User table :)");
     }
 
     @DeleteMapping("/{id}")

@@ -47,4 +47,12 @@ public class Judges {
     public void setScores(Set<Scores> scores) {
         this.scores = scores;
     }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

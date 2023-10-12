@@ -16,7 +16,6 @@ import com.capstone.hackathon.repo.UserRepo;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Scanner;
 
 @Service
 public class UserService {
@@ -64,13 +63,17 @@ public class UserService {
 			newRequest.setEmail(registrationRequest.getEmail());
 			newRequest.setName(registrationRequest.getName());
 			newRequest.setRole(role);
-			rr.save(newRequest);
-			return "Registration request submitted. Waiting for admin approval. You will recieve an email confirmation.";
+			try{
+				rr.save(newRequest);
+			}catch(Exception e){
+				throw new EmailExistsException(registrationRequest.getEmail()+" This email is alredy in the review process!");
+			}
+			return "Registration request submitted. Waiting for admin approval. Try logging in 1-2 hrs.";
 		}
 		String newPw = hashPassword(registrationRequest.getPassword());
 		registrationRequest.setPassword(newPw);
 		ur.save(registrationRequest);
-		return "User registered successfully.";
+		return "User registered successfully as Participant!";
 	}
 
 	// if email already in DB or not

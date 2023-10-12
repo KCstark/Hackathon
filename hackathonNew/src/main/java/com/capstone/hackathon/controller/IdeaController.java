@@ -6,20 +6,62 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.capstone.hackathon.entities.Idea;
+import com.capstone.hackathon.entities.Panelist;
+import com.capstone.hackathon.entities.User;
+import com.capstone.hackathon.errorHandling.ResourceNotFoundException;
+import com.capstone.hackathon.repo.UserRepo;
 import com.capstone.hackathon.service.IdeaService;
+import com.capstone.hackathon.service.PanelistService;
+
+import jakarta.annotation.PostConstruct;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/ideas")
+@RequestMapping("/hackathon/ideas")
 public class IdeaController {
-
-    private final IdeaService ideaService;
-
     @Autowired
-    public IdeaController(IdeaService ideaService) {
-        this.ideaService = ideaService;
+    private UserRepo ur;
+    @Autowired
+    private PanelistService ps;
+    @Autowired
+    private IdeaService ideaService;
+
+     List<Panelist> panel;
+    Panelist currP = null;
+
+    @PostConstruct
+    public void init() {
+        panel = ps.getAllPanelists();
+    }
+
+    // Endpoint to allow a logged-in user to add an idea
+    @PostMapping("{useId}/add")
+    public ResponseEntity<Idea> addIdea(@RequestBody Idea idea, @PathVariable int userId) {
+        // Check if the user is logged in
+        Optional<User> u = ur.findById(userId);
+        if (!u.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        int size = panel.size();
+        if (size <= 0) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        // Save the idea to the repository
+        currP = panel.remove(0);
+        Idea createdIdea = ideaService.createIdea(idea);
+        createdIdea.setPanelist(currP);
+        panel.add(size - 1, currP);
+        return new ResponseEntity<>(createdIdea, HttpStatus.CREATED);
+    }
+
+    // View Idea
+    @GetMapping("/{ideaId}")
+    public ResponseEntity<Idea> viewIdeaById(@PathVariable int ideaId) {
+        Optional<Idea> idea = ideaService.getIdeaById(ideaId);
+        return idea.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     // Create a new idea
@@ -27,14 +69,6 @@ public class IdeaController {
     public ResponseEntity<Idea> createIdea(@RequestBody Idea idea) {
         Idea createdIdea = ideaService.createIdea(idea);
         return new ResponseEntity<>(createdIdea, HttpStatus.CREATED);
-    }
-
-    // Get an idea by ID
-    @GetMapping("/{ideaId}")
-    public ResponseEntity<Idea> getIdeaById(@PathVariable int ideaId) {
-        Optional<Idea> idea = ideaService.getIdeaById(ideaId);
-        return idea.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     // Get all ideas
