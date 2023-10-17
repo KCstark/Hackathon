@@ -37,29 +37,29 @@ public class RegUserService {
     @Autowired
     private UserRepo userRepository;
     /*********************************************************************************************/
-    public String addTeamMembers(int ideaId, List<String> teamMemberEmails) {
-        // Fetch the idea by its ID
-        Idea idea = ideaRepository.findById(ideaId)
-                .orElseThrow(() -> new ResourceNotFoundException("Idea with ID " + ideaId + " not found"));
+    public String addTeamMembers(int userId, List<String> teamMemberEmails) {
+        // Fetch the user by its ID
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User with ID " + userId + " not found"));
 
-        if (teamMemberEmails.size() > 4) {
-            throw new BadRequestException("You can only add up to 4 team members, including yourself.");
+        if (teamMemberEmails.size() > 3) {
+            throw new BadRequestException("You can only add up to 3 more members, excluding yourself.");
         }
-
+        Idea idea= user.getRegUsers().getIdea();
         for (String email : teamMemberEmails) {
             // Check if the email is registered in the User table
             User userOptional = userRepository.findByEmail(email);
 
             if (userOptional!=null) {
                 // Check if the email is already registered in the RegUser table
-                if (regUserRepository.existsById(userOptional.getuId())) {
+                if (regUserRepo.existsById(userOptional.getuId())) {
                     throw new NotAllowedException(email + " is already part of another team.");
                 } else {
                     // Create a new RegUser and associate it with the idea
                     RegUsers regUser = new RegUsers();
                     regUser.setUser(userOptional);
                     regUser.setIdea(idea);
-                    regUserRepository.save(regUser);
+                    regUserRepo.save(regUser);
                     Set<RegUsers> ru=idea.getUserIdeaMappings();
                     if(ru==null){
                         ru=new HashSet<>();

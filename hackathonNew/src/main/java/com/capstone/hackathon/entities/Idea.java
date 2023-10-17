@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -34,11 +35,11 @@ public class Idea {
     private String status="PENDING";
 
     @OneToMany(mappedBy = "idea", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonManagedReference
+    @JsonIgnore
     private Set<RegUsers> userIdeaMappings;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "PanelistId") // This refers to the foreign key column in the ideas table
+    // @JoinColumn(name = "PanelistId") // This refers to the foreign key column in the ideas table
     @JsonBackReference // This indicates the back reference in the bidirectional relationship
     private Panelist panelist;
 
