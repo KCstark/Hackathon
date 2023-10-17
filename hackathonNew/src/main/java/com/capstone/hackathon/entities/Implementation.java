@@ -18,6 +18,12 @@ public class Implementation {
     @JoinColumn(name = "AcceptedIdea", unique = true)
     private AcceptedIdea acceptedIdea; // Reference to the accepted idea
 
+    @Override
+    public String toString() {
+        return "Implementation [implementationId=" + implementationId + ", implDescription=" + implDescription
+                + ", documentation=" + documentation + ", acceptedIdea=" + acceptedIdea.getIdeaId() + "]";
+    }
+
     public int getImplementationId() {
         return implementationId;
     }
@@ -48,6 +54,14 @@ public class Implementation {
 
     public void setDocumentation(String documentation) {
         this.documentation = documentation;
+    }
+
+    public String getImplDescription() {
+        return implDescription;
+    }
+
+    public void setImplDescription(String implDescription) {
+        this.implDescription = implDescription;
     }
 }
 

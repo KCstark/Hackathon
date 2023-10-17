@@ -13,6 +13,7 @@ import com.capstone.hackathon.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -36,7 +37,7 @@ public class RegUserService {
     @Autowired
     private UserRepo userRepository;
     /*********************************************************************************************/
-    public void addTeamMembers(int ideaId, List<String> teamMemberEmails) {
+    public String addTeamMembers(int ideaId, List<String> teamMemberEmails) {
         // Fetch the idea by its ID
         Idea idea = ideaRepository.findById(ideaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Idea with ID " + ideaId + " not found"));
@@ -60,14 +61,19 @@ public class RegUserService {
                     regUser.setIdea(idea);
                     regUserRepository.save(regUser);
                     Set<RegUsers> ru=idea.getUserIdeaMappings();
+                    if(ru==null){
+                        ru=new HashSet<>();
+                    }
                     ru.add(regUser);
                     idea.setUserIdeaMappings(ru);//saving reguser in set for idea
                     userOptional.setRegUsers(regUser);//saving regUser in User
+                    
                 }
             } else {
                 throw new ResourceNotFoundException(email + " is not a registered user.");
             }
         }
+        return "Team added succesfully";
     }
     /*********************************************************************************************/
     public List<RegUsers> getAllRegUsers() {

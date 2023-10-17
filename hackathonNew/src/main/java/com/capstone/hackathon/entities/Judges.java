@@ -3,6 +3,10 @@ package com.capstone.hackathon.entities;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -13,7 +17,6 @@ public class Judges {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "JudgeId")
     private int judgeId;
-
     @Column(name = "Name")
     private String name;
 
@@ -22,7 +25,13 @@ public class Judges {
     private User user;
 
     @OneToMany(mappedBy = "judge", cascade = CascadeType.ALL)
-    private Set<Scores> scores = new HashSet<>();
+    // @JsonManagedReference
+    private Set<Scores> scores;
+    
+    @Override
+    public String toString() {
+        return "Judges [judgeId=" + judgeId + ", name=" + name + ", user=" + user.getEmail() + ", scores=" + scores + "]";
+    }
 
     public int getJudgeId() {
         return judgeId;

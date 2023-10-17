@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "AcceptedIdea")
 public class AcceptedIdea {
@@ -21,7 +23,14 @@ public class AcceptedIdea {
     private Implementation ideaImplementation; // Reference to the implementation
 
     @OneToMany(mappedBy = "acceptedIdea", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Scores> scores = new HashSet<>();
+    // @JsonManagedReference
+    private Set<Scores> scores;
+
+    @Override
+    public String toString() {
+        return "AcceptedIdea [ideaId=" + ideaId + ", idea=" + idea.getTitle() + ", ideaImplementation=" + ideaImplementation.getDescription()
+                + ", scores=" + scores + "]";
+    }
 
     public int getIdeaId() {
         return ideaId;

@@ -1,5 +1,8 @@
 package com.capstone.hackathon.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -13,14 +16,22 @@ public class Scores {
 
     @ManyToOne
     @JoinColumn(name = "AcceptedIdea")
+    @JsonBackReference
     private AcceptedIdea acceptedIdea; // Reference to the accepted idea
 
     @ManyToOne
     @JoinColumn(name = "JudgeId")
+    // @JsonBackReference
     private Judges judge; // Reference to the judge who provided the score
 
     @Column(name = "ScoreValue")
     private int scoreValue;
+
+    @Override
+    public String toString() {
+        return "Scores [scoreId=" + scoreId + ", acceptedIdea=" + acceptedIdea.getIdea().getTitle() + ", judge=" + judge.getUser().getEmail() + ", scoreValue="
+                + scoreValue + "]";
+    }
 
     public int getScoreId() {
         return scoreId;

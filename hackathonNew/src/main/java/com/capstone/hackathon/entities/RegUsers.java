@@ -1,5 +1,8 @@
 package com.capstone.hackathon.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,11 +29,12 @@ public class RegUsers {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "IdeaId") // This refers to the foreign key column in the RegUsers table
+    @JsonBackReference
     private Idea idea;
 
     @Override
     public String toString() {
-        return "RegUsers [RegId=" + RegId + ", user=" + user + ", idea=" + idea + "]";
+        return "RegUsers [RegId=" + RegId + ", user=" + user.getEmail() + ", idea=" + idea.getTitle() + "]";
     }
 
     public int getRegId() {

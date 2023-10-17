@@ -3,9 +3,13 @@ package com.capstone.hackathon.entities;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,21 +33,23 @@ public class Idea {
     @Column(name = "Status")
     private String status="PENDING";
 
-    @OneToMany(mappedBy = "idea", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<RegUsers> userIdeaMappings = new HashSet<>();
+    @OneToMany(mappedBy = "idea", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private Set<RegUsers> userIdeaMappings;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "PanelistId") // This refers to the foreign key column in the ideas table
+    @JsonBackReference // This indicates the back reference in the bidirectional relationship
     private Panelist panelist;
 
     @OneToOne(mappedBy = "idea")
     private AcceptedIdea acceptedIdea; // Reference to the accepted idea, if applicable
     
+
     @Override
     public String toString() {
         return "Idea [ideaId=" + ideaId + ", title=" + title + ", description=" + description + ", status=" + status
-                + ", userIdeaMappings=" + userIdeaMappings + ", panelist=" + panelist + ", acceptedIdea=" + acceptedIdea
-                + "]";
+                + ", userIdeaMappings=" + userIdeaMappings + ", acceptedIdea=" + acceptedIdea + "]";
     }
 
     public AcceptedIdea getAcceptedIdea() {
@@ -86,20 +92,20 @@ public class Idea {
         this.status = status;
     }
 
-    public Panelist getPanelist() {
-        return panelist;
-    }
-
-    public void setPanelist(Panelist panelist) {
-        this.panelist = panelist;
-    }
-
     public Set<RegUsers> getUserIdeaMappings() {
         return userIdeaMappings;
     }
 
     public void setUserIdeaMappings(Set<RegUsers> userIdeaMappings) {
         this.userIdeaMappings = userIdeaMappings;
+    }
+
+    public Panelist getPanelist() {
+        return panelist;
+    }
+
+    public void setPanelist(Panelist panelist) {
+        this.panelist = panelist;
     }
     
 }

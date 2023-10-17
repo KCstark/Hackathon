@@ -9,7 +9,6 @@ import com.capstone.hackathon.entities.Idea;
 import com.capstone.hackathon.entities.Panelist;
 import com.capstone.hackathon.entities.User;
 import com.capstone.hackathon.errorHandling.ResourceNotFoundException;
-import com.capstone.hackathon.repo.PanelistRepo;
 import com.capstone.hackathon.repo.UserRepo;
 import com.capstone.hackathon.service.IdeaService;
 import com.capstone.hackathon.service.PanelistService;
@@ -17,6 +16,7 @@ import com.capstone.hackathon.service.RegUserService;
 
 import jakarta.annotation.PostConstruct;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -42,7 +42,7 @@ public class IdeaController {
     }
 
     // Endpoint to allow a logged-in user to add an idea
-    @PostMapping("{useId}/add")
+    @PostMapping("/{userId}/add")
     public ResponseEntity<Idea> addIdea(@RequestBody Idea idea, @PathVariable int userId) {
         // Check if the user is logged in
         Optional<User> u = ur.findById(userId);
@@ -55,23 +55,32 @@ public class IdeaController {
         }
         // Save the idea to the repository
         currP = panel.remove(0);
+        // System.out.println(currP);
         Idea createdIdea = ideaService.createIdea(idea);
+        
+        currP.getIdeas().size();
+
         createdIdea.setPanelist(currP);// saving panelist to idea
-        panel.add(size - 1, currP);
         Set<Idea> s = currP.getIdeas();
+        if(s==null){
+            s=new HashSet<Idea>();
+        }
         s.add(createdIdea);
+        // System.out.println(createdIdea);
         currP.setIdeas(s);// saving idea to panelist
+        // System.out.println(currP.getIdeas());
+        panel.add(size - 1, currP);
         return new ResponseEntity<>(createdIdea, HttpStatus.CREATED);
     }
 
     // Add Team Members
     // Endpoint to add team members to an idea
     @PostMapping("/{ideaId}/addTeamMembers")
-    public ResponseEntity<Idea> addTeamMembersToIdea(@PathVariable int ideaId,@RequestBody List<String> teamMemberEmails) {
+    public ResponseEntity<String> addTeamMembersToIdea(@PathVariable int ideaId,@RequestBody List<String> teamMemberEmails) {
         // Call the service to add team members
-        rs.addTeamMembers(ideaId, teamMemberEmails);
+        String s=rs.addTeamMembers(ideaId, teamMemberEmails);
         // You might want to return a response, depending on your use case.
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(s,HttpStatus.CREATED);
     }
 
     // View Idea

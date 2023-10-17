@@ -39,7 +39,7 @@ public class User {
 	@Override
 	public String toString() {
 		return "User [uId=" + uId + ", name=" + name + ", email=" + email + ", password=" + password + ", panelist="
-				+ panelist + ", judges=" + judges + ", regUsers=" + regUsers + ", role=" + role + "]";
+				+ panelist.getPanelistId() + ", judges=" + judges.getJudgeId() + ", regUsers=" + regUsers.getIdea().getTitle() + ", role=" + role + "]";
 	}
 
 	public void setuId(int uId) {

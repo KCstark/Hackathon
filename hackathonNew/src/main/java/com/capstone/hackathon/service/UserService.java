@@ -69,12 +69,19 @@ public class UserService {
 			}catch(Exception e){
 				throw new EmailExistsException(registrationRequest.getEmail()+" This email is alredy in the review process!");
 			}
-			return "Registration request submitted. Waiting for admin approval. Try logging in 1-2 hrs.";
+			return "Registration request submitted. Waiting for admin approval. you will get an email from us.";
 		}
 		String newPw = hashPassword(registrationRequest.getPassword());
 		registrationRequest.setPassword(newPw);
 		ur.save(registrationRequest);
-		return "User registered successfully as Participant!";
+		try {
+            // Send email
+            emailService.confirmationEmail(registrationRequest.getEmail(), role, "Approved");
+            return "Approval email sent successfully to: " + registrationRequest.getEmail();
+        } catch (MailException e) {
+            throw e;
+        }
+		// return "User registered successfully as Participant!";
 	}
 
 	// if email already in DB or not
@@ -179,7 +186,7 @@ public class UserService {
 			throw new ResourceNotFoundException("Your email is not in our database please register first!");
 		}
 
-		String resetLink = "http://localhost:8081/hackathon/users/update-password**(form page)**";
+		String resetLink = "{ Link not available at the moment :( }";
 
 		try {
 			// Send the password reset email

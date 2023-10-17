@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,7 +35,9 @@ public class UserController {
             return ResponseEntity.ok(message);
         } catch (EmailExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (Exception ex) {
+        } catch (MailException e){
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to Send Mail "+ e.getMessage());
+		}catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to register user "+ ex.getMessage());
         }
     }
@@ -74,10 +78,16 @@ public class UserController {
 		} catch (ResourceNotFoundException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		} catch (MailException e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+			return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
 					.body("Failed to send password reset email");
 		}
 	}
+
+	 @DeleteMapping("/{UserId}")
+    public ResponseEntity<String> deleteAll(@PathVariable int UserId){
+        us.deleteUser(UserId);
+        return ResponseEntity.ok("this user deleted succefully!");
+    }
 
 
 }

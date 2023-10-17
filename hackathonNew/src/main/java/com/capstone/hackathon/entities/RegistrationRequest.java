@@ -19,7 +19,13 @@ public class RegistrationRequest {
 	private String role;// 1.Participant, 2.TeamMember, 3.Panelist, 4.Judge
 
     // Status field: "pending," "approved," or "rejected"
-    private String status="Pending";
+    private String status="PENDING";
+
+    @Override
+    public String toString() {
+        return "RegistrationRequest [reqId=" + reqId + ", name=" + name + ", email=" + email + ", password=" + password
+                + ", role=" + role + ", status=" + status + "]";
+    }
 
     public void setReqId(int reqId) {
         this.reqId = reqId;
